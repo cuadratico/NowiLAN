@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:background="@color/black_c"
+    >
+
+
+
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recy"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/back_top"
+        app:layout_constraintBottom_toTopOf="@id/back_bot"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:clipToPadding="false"
+        />
+
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/wifi_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/wifi_off"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/wifi_reca"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/green_border_25"
+        app:layout_constraintTop_toBottomOf="@id/wifi_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="20dp"
+        android:textColor="@color/white"
+        android:fontFamily="monospace"
+        android:textAllCaps="false"
+        android:text="check the connection"
+        android:textSize="15dp"
+        />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/back_center"
+        android:layout_width="350dp"
+        android:layout_height="300dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        >
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/create_pass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/back_direction"
+            android:src="@drawable/create_pass"
+            />
+
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/green_border_25"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginBottom="20dp"
+            android:textColor="@color/white"
+            android:fontFamily="monospace"
+            android:textAllCaps="false"
+            android:text="Create"
+            android:textSize="15dp"
+            />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/modi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/modify"
+            app:layout_constraintTop_toTopOf="@id/button"
+            app:layout_constraintBottom_toBottomOf="@id/button"
+            app:layout_constraintStart_toEndOf="@id/button"
+            android:layout_marginStart="20dp"
+            />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/port_back"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/button"
+            android:layout_marginBottom="20dp"
+            app:boxStrokeWidth="2dp"
+
+            >
+
+            <EditText
+                android:id="@+id/port"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="17dp"
+                android:hint="Port"
+                android:fontFamily="monospace"
+                android:inputType="number"
+                android:maxLines="1"
+
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ports"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/port_back"
+            app:layout_constraintBottom_toBottomOf="@id/port_back"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/port_back"
+            android:src="@drawable/ports"
+            />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/save_ports"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/port_back"
+            app:layout_constraintBottom_toBottomOf="@id/port_back"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/port_back"
+            android:src="@drawable/save"
+            />
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/back_direction"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/port_back"
+            android:layout_marginBottom="20dp"
+            app:boxStrokeWidth="2dp"
+
+            >
+
+            <EditText
+                android:id="@+id/direction"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="17dp"
+                android:hint="Private IP"
+                android:fontFamily="monospace"
+                android:maxLines="1"
+                />
+
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/back_direction"
+            app:layout_constraintBottom_toBottomOf="@id/back_direction"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/back_direction"
+            android:src="@drawable/ips"
+            />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/save_directions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/back_direction"
+            app:layout_constraintBottom_toBottomOf="@id/back_direction"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/back_direction"
+            android:src="@drawable/save"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/back_bot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:fitsSystemWindows="true"
+        >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/back_message"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/back_bot"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="20dp"
+            android:background="@drawable/green_border_25"
+            >
+
+
+            <EditText
+                android:id="@+id/message"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:textColor="@color/white"
+                android:fontFamily="monospace"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:hint="Message"
+                android:textSize="17dp"
+                android:background="@color/chat_back_background"
+                />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/send"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/back_message"
+            app:layout_constraintTop_toTopOf="@id/back_message"
+            app:layout_constraintBottom_toBottomOf="@id/back_message"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/back_top"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        >
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="7dp"
+            android:src="@drawable/person"
+            />
+
+        <TextView
+            android:id="@+id/expre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="45dp"
+            android:textSize="17dp"
+            android:fontFamily="monospace"
+            android:textColor="@color/green"
+            android:text="9090"
+            />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/disconnect"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/expre"
+            />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
