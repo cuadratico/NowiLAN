@@ -58,7 +58,7 @@ Yes — to do this you would need to perform a port sweep on the device with the
 
 ```bash
 sudo apt install nmap
-´´´
+```
 
 ```bash
 sudo nmap 100.100.100.100 
