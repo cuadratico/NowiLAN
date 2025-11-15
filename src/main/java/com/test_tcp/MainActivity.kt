@@ -70,10 +70,9 @@ class MainActivity : AppCompatActivity() {
     companion object {
         var update = false
     }
-    private lateinit var channel: Socket
+    private var channel: Socket? = null
     private lateinit var adapter: chat_adapter
-    private lateinit var dialog: Dialog
-    private lateinit var dialog_auth: Dialog
+    private lateinit var dialog_very: Dialog
     private lateinit var adapter_saves: saves_adapter
     private lateinit var load_dialog: Dialog
     private lateinit var dialog_pass: BottomSheetDialog
@@ -129,6 +128,8 @@ class MainActivity : AppCompatActivity() {
 
         val back_bot = findViewById<ConstraintLayout>(R.id.back_bot)
 
+        val message = findViewById<TextView>(R.id.info_nowi)
+
         val send = findViewById<ShapeableImageView>(R.id.send)
         val input_message = findViewById<EditText>(R.id.message)
         send.visibility = View.INVISIBLE
@@ -167,11 +168,20 @@ class MainActivity : AppCompatActivity() {
                 button.text = "Connect"
                 back_direction.visibility = View.VISIBLE
                 ips.visibility = View.VISIBLE
+                if (very_data(input_direction.text.toString(), 1)) {
+                    save_direction.visibility = View.VISIBLE
+                }
             } else {
                 back_direction.visibility = View.INVISIBLE
                 ips.visibility = View.INVISIBLE
+                save_direction.visibility = View.INVISIBLE
+                input_direction.setText("")
                 button.text = "Create"
             }
+            if (very_data(input_port.text.toString())) {
+                save_ports.visibility = View.VISIBLE
+            }
+
             if (!pref.getBoolean("start", false)) {
                 ips.visibility = View.INVISIBLE
                 ports.visibility = View.INVISIBLE
@@ -182,7 +192,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         button_version()
-
 
 
         modi.setOnClickListener {
@@ -221,32 +230,34 @@ class MainActivity : AppCompatActivity() {
                     channel = Socket(input_direction.text.toString(), input_port.text.toString().toInt())
                 }
                 withContext(Dispatchers.Main) {
-                    dialog.dismiss()
+                    load_dialog.dismiss()
                     input_direction.setText("")
                     input_port.setText("")
-                    port_exp.text = channel.inetAddress.toString().replace("/", "")
+                    port_exp.text = channel!!.inetAddress.toString().replace("/", "")
                     send.visibility = View.VISIBLE
                     close.visibility = View.VISIBLE
                 }
             }catch (e: Exception) {
                 Log.e("Error", e.toString())
+                channel?.close()
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@MainActivity, "Connection interrupted", Toast.LENGTH_SHORT).show()
                     recreate()
                 }
             }
 
+
+
             while (true) {
 
                 try {
-                    if (channel.isConnected && channel.inputStream.read() != 0) {
+                    if (channel!!.isConnected && channel!!.inputStream.read() != 0) {
                         val buffer = ByteArray(2048)
 
-                        val read = channel.inputStream.read(buffer)
+                        val read = channel!!.inputStream.read(buffer)
 
                         chat_list.add(chat(String(buffer, 0, read, Charsets.UTF_8), false))
 
-                        Log.e("lista", chat_list.toString())
                         withContext(Dispatchers.Main) {
                             adapter.update(chat_list)
                             recy.scrollToPosition(chat_list.size)
@@ -255,7 +266,7 @@ class MainActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
                     Log.e("Error", e.toString())
-                    channel.close()
+                    channel?.close()
                     withContext(Dispatchers.Main) {
                         Toast.makeText(this@MainActivity, "Connection interrupted", Toast.LENGTH_SHORT).show()
                         recreate()
@@ -264,6 +275,46 @@ class MainActivity : AppCompatActivity() {
 
                 delay(50)
             }
+        }
+
+        fun close () {
+            MaterialAlertDialogBuilder(this).apply {
+                setTitle("Are you sure you want to close the connection?")
+                setMessage("If you close the connection, all chat information will be deleted.")
+                setPositiveButton("Close") {_, _ ->
+                    scope.cancel()
+                    channel?.close()
+                    recreate()
+                }
+                setNegativeButton("Keep") {_, _ ->}
+            }.show()
+        }
+
+        fun load (text: String, sock: Boolean = false): Dialog {
+
+            val dialog = Dialog(this@MainActivity)
+            val view = LayoutInflater.from(this@MainActivity).inflate(R.layout.connection_delay, null)
+
+            val progress = view.findViewById<ProgressBar>(R.id.progress)
+            val info_text = view.findViewById<TextView>(R.id.text)
+            val button = view.findViewById<ShapeableImageView>(R.id.disco)
+
+            if (!sock)  {
+                button.visibility = View.INVISIBLE
+            }
+
+            button.setOnClickListener {
+                close()
+            }
+
+            progress.isActivated = true
+            info_text.text = text
+
+            dialog.setContentView(view)
+            dialog.setCancelable(false)
+            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog.show()
+            return dialog
         }
 
         input_direction.addTextChangedListener { ip ->
@@ -282,32 +333,22 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val promt = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Port Authentication")
+            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+            .build()
+
         button.setOnClickListener {
             if (input_port.text.isNotEmpty() && very_data(input_port.text.toString())) {
 
                 if ((pref.getBoolean("sta", false) && very_data(input_direction.text.toString(), 1)) || !pref.getBoolean("sta", false)) {
 
-
-                    val promt = BiometricPrompt.PromptInfo.Builder()
-                        .setTitle("Port Authentication")
-                        .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
-                        .build()
-
-
                     BiometricPrompt(this, ContextCompat.getMainExecutor(this), object : BiometricPrompt.AuthenticationCallback() {
                             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                                 super.onAuthenticationSucceeded(result)
+                                message.visibility = View.INVISIBLE
 
-                                dialog = Dialog(this@MainActivity)
-                                val view = LayoutInflater.from(this@MainActivity).inflate(R.layout.connection_delay, null)
-
-                                val progress_bar = view.findViewById<ProgressBar>(R.id.progress)
-                                progress_bar.isActivated = true
-
-                                dialog.setContentView(view)
-                                dialog.setCancelable(false)
-                                dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                                dialog.show()
+                                load_dialog = load("Wait for the connection to be established.", true)
 
                                 scope.start()
 
@@ -322,6 +363,7 @@ class MainActivity : AppCompatActivity() {
                                 recy.layoutManager = LinearLayoutManager(this@MainActivity)
                             }
                         }).authenticate(promt)
+
                 }else {
                     Toast.makeText(this, "IP problems", Toast.LENGTH_SHORT).show()
                 }
@@ -333,7 +375,7 @@ class MainActivity : AppCompatActivity() {
 
         send.setOnClickListener {
             lifecycleScope.launch (Dispatchers.IO) {
-                channel.outputStream.write(" ${input_message.text.toString()}".toByteArray())
+                channel!!.outputStream.write(" ${input_message.text.toString()}".toByteArray())
                 cancel()
             }
             chat_list.add(chat(input_message.text.toString()))
@@ -343,22 +385,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         close.setOnClickListener {
-
-            MaterialAlertDialogBuilder(this).apply {
-                setTitle("Are you sure you want to close the connection?")
-                setMessage("If you close the connection, all chat information will be deleted.")
-                setPositiveButton("Close") {_, _ ->
-                    scope.cancel()
-                    channel.close()
-                    recreate()
-                }
-                setNegativeButton("Keep") {_, _ ->}
-            }.show()
+            close()
         }
 
         fun very_pass (): Pair<AppCompatButton, EditText> {
 
-            dialog_auth = Dialog(this)
+            dialog_very = Dialog(this)
             val view = LayoutInflater.from(this).inflate(R.layout.pass_auth, null)
 
             val input_pass = view.findViewById<EditText>(R.id.input_pass)
@@ -370,12 +402,14 @@ class MainActivity : AppCompatActivity() {
                 entropy(data.toString(), progress)
             }
 
-            dialog_auth.setContentView(view)
-            dialog_auth.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            dialog_auth.show()
+            dialog_very.setContentView(view)
+            dialog_very.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog_very.show()
 
             return Pair(very, input_pass)
         }
+
+
 
         create_pass.setOnClickListener {
 
@@ -385,7 +419,7 @@ class MainActivity : AppCompatActivity() {
                 create.isEnabled = false
                 input_pass.isEnabled = false
                 if (input_pass.text.isNotEmpty()) {
-                    val load = load(this, "Creating the cryptographic key")
+                    load_dialog = load("Creating the cryptographic key")
                     try {
                         lifecycleScope.launch (Dispatchers.IO) {
                             val ks = KeyGenParameterSpec.Builder(input_pass.text.toString(), KeyProperties.PURPOSE_DECRYPT or KeyProperties.PURPOSE_ENCRYPT).apply {
@@ -407,8 +441,8 @@ class MainActivity : AppCompatActivity() {
 
                             withContext(Dispatchers.Main) {
                                 button_version()
-                                load.dismiss()
-                                dialog_auth.dismiss()
+                                load_dialog.dismiss()
+                                dialog_very.dismiss()
                             }
                             cancel()
                         }
@@ -432,13 +466,37 @@ class MainActivity : AppCompatActivity() {
 
 
 
+        fun dialog_de () {
+            dialog_pass = BottomSheetDialog(this@MainActivity)
+            val view = LayoutInflater.from(this@MainActivity).inflate(R.layout.saves_inter, null)
+
+            val recy = view.findViewById<RecyclerView>(R.id.recy)
+
+            adapter_saves = saves_adapter(saves_list)
+            recy.adapter = adapter_saves
+            recy.layoutManager = LinearLayoutManager(this@MainActivity)
+
+            dialog_pass.setContentView(view)
+            dialog_pass.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog_pass.show()
+
+            dialog_pass.setOnDismissListener(object: DialogInterface.OnDismissListener {
+                override fun onDismiss(dialog: DialogInterface?) {
+                    pref.edit().putString("k_u", "").commit()
+                    saves_list.clear()
+                }
+
+            })
+        }
+
+
         fun very_db (type: Int) {
 
             val scope = CoroutineScope(Dispatchers.IO).launch (start = CoroutineStart.LAZY){
                 val db = db_info(applicationContext)
                 if (db.select(type.toString()) || saves_list.isNotEmpty()) {
                     withContext(Dispatchers.Main) {
-                        load_dialog = load(this@MainActivity, "decrypting the information")
+                        load_dialog = load("decrypting the information")
                     }
                     try {
                         val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
@@ -455,9 +513,8 @@ class MainActivity : AppCompatActivity() {
 
                         withContext(Dispatchers.Main) {
                             Log.e("pass", saves_list.toString())
-                            adapter_saves = saves_adapter(saves_list)
-                            dialog_auth.dismiss()
-                            dialog_pass = dialog_de(this@MainActivity, pref, adapter_saves, update_all)
+                            dialog_very.dismiss()
+                            dialog_de()
                         }
 
                     } catch (e: Exception) {
@@ -482,36 +539,54 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        ips.setOnClickListener {
-            val (very, input) = very_pass()
 
-            very.setOnClickListener {
-                if (very(this, input.text.toString(), pref)) {
-                    very_db(1)
-                    update_all.start()
+        ips.setOnClickListener {
+            BiometricPrompt(this, ContextCompat.getMainExecutor(this), object: BiometricPrompt.AuthenticationCallback() {
+
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    val (very, input) = very_pass()
+
+                    very.setOnClickListener {
+                        if (very(this@MainActivity, input.text.toString(), pref)) {
+                            very_db(1)
+                            update_all.start()
+                        }
+                    }
                 }
-            }
+            }).authenticate(promt)
         }
 
         ports.setOnClickListener {
-            val (very, input) = very_pass()
-            very.setOnClickListener {
-                if (very(this, input.text.toString(), pref)) {
-                    very_db(0)
-                    update_all.start()
+            BiometricPrompt(this, ContextCompat.getMainExecutor(this), object: BiometricPrompt.AuthenticationCallback() {
+
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    val (very, input) = very_pass()
+                    very.setOnClickListener {
+                        if (very(this@MainActivity, input.text.toString(), pref)) {
+                            very_db(0)
+                            update_all.start()
+                        }
+                    }
                 }
-            }
+            })
         }
 
 
 
+        fun save_very (value: String) {
+            dialog_very.dismiss()
+            load_dialog = load("Saving your $value")
+            save_values(this, pref, "Default name", 0, input_port.text.toString(), load_dialog)
+        }
 
         save_ports.setOnClickListener {
             val (very, input) = very_pass()
 
             very.setOnClickListener {
                 if (very(this, input.text.toString(), pref)) {
-                    save_values(this, pref, "Default name", 0, input_port.text.toString(), dialog_auth)
+                    save_very("port")
                 }
             }
         }
@@ -521,7 +596,7 @@ class MainActivity : AppCompatActivity() {
 
             very.setOnClickListener {
                 if (very(this, input.text.toString(), pref)) {
-                    save_values(this, pref, "Default name", 1, input_direction.text.toString(), dialog_auth)
+                    save_very("IP")
                 }
             }
         }
