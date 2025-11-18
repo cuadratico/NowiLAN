@@ -1,5 +1,7 @@
 ![Logo](https://github.com/cuadratico/NowiLAN/blob/master/src/main/chat_back-playstore.png)
 
+# VirusTotal V0.0.2 Security Audit
+https://www.virustotal.com/gui/file/c4af522b6f29afa1b00a2d08ee96446f089a33ba0772681b534781e607a8ae7a/detection
 
 # NowiLAN
 A simple app to establish connections via the local communication protocol **TCP**.

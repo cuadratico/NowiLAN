@@ -1,0 +1,1 @@
+An app for establishing TCP connections, NOT encrypted by a hybrid encryption protocol. NowiLAN also has a symmetric cryptography-encrypted database where you can save your most frequently used IP addresses and ports.
