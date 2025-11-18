@@ -1,16 +1,21 @@
 package com.test_tcp
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Log
@@ -29,6 +34,10 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationChannelCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -71,30 +80,31 @@ class MainActivity : AppCompatActivity() {
         var update = false
     }
     private var channel: Socket? = null
-    private lateinit var adapter: chat_adapter
+    private var adapter: chat_adapter? = null
     private lateinit var dialog_very: Dialog
     private lateinit var adapter_saves: saves_adapter
     private lateinit var load_dialog: Dialog
     private lateinit var dialog_pass: BottomSheetDialog
 
+    private lateinit var noti: ShapeableImageView
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    private lateinit var pref: SharedPreferences
+
+    private val chat_list = mutableListOf<chat>()
+
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        delegate.localNightMode = AppCompatDelegate.MODE_NIGHT_YES
-
-
         val mk = MasterKey.Builder(this)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
-        val pref = EncryptedSharedPreferences.create(this, "ap", mk, EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        pref = EncryptedSharedPreferences.create(this, "ap", mk, EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM)
 
-        val chat_list = mutableListOf<chat>()
+        delegate.localNightMode = AppCompatDelegate.MODE_NIGHT_YES
 
         val recy = findViewById<RecyclerView>(R.id.recy)
 
@@ -104,6 +114,7 @@ class MainActivity : AppCompatActivity() {
 
         val back_top = findViewById<ConstraintLayout>(R.id.back_top)
         val port_exp = findViewById<TextView>(R.id.expre)
+        noti = findViewById(R.id.noti)
         val close = findViewById<ShapeableImageView>(R.id.close)
         close.visibility = View.INVISIBLE
 
@@ -162,6 +173,33 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+        fun permiss (): Boolean {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
+                return false
+            } else {
+                return true
+            }
+        }
+
+        if (!permiss()) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100)
+        } else {
+            noti.setImageResource(R.drawable.notification_on)
+        }
+
+        noti.setOnClickListener {
+            if (permiss()) {
+                pref.edit().putBoolean("noti", !pref.getBoolean("noti", false)).commit()
+                if (pref.getBoolean("noti", false)) {
+                    noti.setImageResource(R.drawable.notification_on)
+                } else {
+                    noti.setImageResource(R.drawable.notification_off)
+                }
+            } else {
+                Toast.makeText(this, "NowiLAN needs notification permissions", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         fun button_version () {
             ports.visibility = View.VISIBLE
             if (pref.getBoolean("sta", false)) {
@@ -218,8 +256,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        /*}
 
-        val scope = lifecycleScope.launch (Dispatchers.IO, start = CoroutineStart.LAZY){
+             */
+
+        val scope = CoroutineScope(Dispatchers.IO).launch (start = CoroutineStart.LAZY){
 
             try {
                 if (!pref.getBoolean("sta", false)) {
@@ -249,19 +290,32 @@ class MainActivity : AppCompatActivity() {
 
 
             while (true) {
-
                 try {
-                    if (channel!!.isConnected && channel!!.inputStream.read() != 0) {
+                    if (channel!!.isConnected && channel!!.inputStream!!.read() != 0) {
                         val buffer = ByteArray(2048)
 
-                        val read = channel!!.inputStream.read(buffer)
+                        channel!!.inputStream.read(buffer)
 
-                        chat_list.add(chat(String(buffer, 0, read, Charsets.UTF_8), false))
+                        val message = String(buffer)
+                        chat_list.add(chat(message, false))
 
-                        withContext(Dispatchers.Main) {
-                            adapter.update(chat_list)
-                            recy.scrollToPosition(chat_list.size)
+                        if (pref.getBoolean("noti", false) && !pref.getBoolean("in", true)) {
+                            val noti = NotificationCompat.Builder(applicationContext, "noti_lan").apply {
+                                    setSmallIcon(R.mipmap.chat_back_round)
+                                    setContentTitle(port_exp.text.toString())
+                                    setContentText(message)
+                                    setPriority(NotificationManager.IMPORTANCE_HIGH)
+                                }.build()
+
+                            NotificationManagerCompat.from(applicationContext).notify(1, noti)
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                adapter?.update(chat_list)
+                                recy.scrollToPosition(chat_list.size)
+                            }
                         }
+
+
                     }
 
                 } catch (e: Exception) {
@@ -271,10 +325,12 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this@MainActivity, "Connection interrupted", Toast.LENGTH_SHORT).show()
                         recreate()
                     }
+                    break
                 }
 
                 delay(50)
             }
+            cancel()
         }
 
         fun close () {
@@ -334,7 +390,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val promt = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Port Authentication")
+            .setTitle("Authenticate yourself")
             .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
             .build()
 
@@ -379,7 +435,7 @@ class MainActivity : AppCompatActivity() {
                 cancel()
             }
             chat_list.add(chat(input_message.text.toString()))
-            adapter.update(chat_list)
+            adapter?.update(chat_list)
             recy.scrollToPosition(chat_list.size)
             input_message.text.clear()
         }
@@ -570,15 +626,15 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-            })
+            }).authenticate(promt)
         }
 
 
 
-        fun save_very (value: String) {
+        fun save_very (value: String, input: EditText = input_port, type: Int = 0) {
             dialog_very.dismiss()
             load_dialog = load("Saving your $value")
-            save_values(this, pref, "Default name", 0, input_port.text.toString(), load_dialog)
+            save_values(this, pref, "Default name", type, input.text.toString(), load_dialog)
         }
 
         save_ports.setOnClickListener {
@@ -596,7 +652,7 @@ class MainActivity : AppCompatActivity() {
 
             very.setOnClickListener {
                 if (very(this, input.text.toString(), pref)) {
-                    save_very("IP")
+                    save_very("IP", input_direction, 1)
                 }
             }
         }
@@ -609,10 +665,39 @@ class MainActivity : AppCompatActivity() {
 
 
 
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        pref.edit().putBoolean("in", true).commit()
+        adapter?.update(chat_list)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        pref.edit().putBoolean("in", false).commit()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String?>, grantResults: IntArray, deviceId: Int) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
+        if (requestCode == 100) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                noti.setImageResource(R.drawable.notification_on)
+                pref.edit().putBoolean("noti", true).commit()
+
+                val register = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                register.createNotificationChannel(NotificationChannel("noti_lan", "noti_chan",
+                    NotificationManager.IMPORTANCE_HIGH))
+
+            } else {
+                Toast.makeText(this, "You will need to request the permits later", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

@@ -11,10 +11,10 @@ android {
 
     defaultConfig {
         applicationId = "com.test_tcp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.0.2"
+        versionCode = 4
+        versionName = "0.1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

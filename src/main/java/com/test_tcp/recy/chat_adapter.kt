@@ -23,7 +23,7 @@ class chat_adapter(var list: List<chat>): RecyclerView.Adapter<chat_holder>() {
 
     fun update (new_list: List<chat>) {
         this.list = new_list
-        notifyDataSetChanged()
+        notifyItemChanged(this.list.size - 1)
     }
 }
 
