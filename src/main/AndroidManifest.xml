@@ -10,15 +10,14 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/chat_back_round"
+        android:icon="@mipmap/peers_logo_round"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/chat_back_round"
+        android:roundIcon="@mipmap/peers_logo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Test_tcp">
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

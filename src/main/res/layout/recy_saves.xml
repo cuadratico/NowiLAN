@@ -5,96 +5,125 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-    <View
-        android:id="@+id/back"
-        android:layout_width="match_parent"
-        android:layout_height="110dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/back_saves"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/green_border_25"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
         android:layout_marginTop="20dp"
-        />
+        >
 
-    <TextView
-        android:id="@+id/name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="@id/back"
-        app:layout_constraintStart_toStartOf="@id/back"
-        app:layout_constraintTop_toTopOf="@id/back"
-        android:layout_marginTop="20dp"
-        android:textSize="17dp"
-        android:fontFamily="monospace"
-        android:textColor="@color/white"
-        android:text="User"
-        android:gravity="center"
-        android:maxWidth="300dp"
-        android:maxLines="2"
-        />
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="15dp"
+            android:textSize="17dp"
+            android:textColor="@color/green"
+            android:fontFamily="@font/pixei"
+            android:text="Nowi station"
+            android:gravity="center"
+            android:maxWidth="190dp"
+            />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/person"
+            app:layout_constraintTop_toTopOf="@id/name"
+            app:layout_constraintBottom_toBottomOf="@id/name"
+            app:layout_constraintEnd_toStartOf="@id/name"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <View
+            android:id="@+id/separator"
+            android:layout_width="200dp"
+            android:layout_height="2dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/name"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/border_25"
+            android:backgroundTint="@color/green"
+            />
+
+        <TextView
+            android:id="@+id/expre_ip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/separator"
+            app:layout_constraintEnd_toEndOf="@id/separator"
+            android:layout_marginTop="20dp"
+            android:textSize="20dp"
+            android:fontFamily="@font/pixei"
+            android:textColor="@color/green"
+            android:text="100.100.100.100"
+            />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ip_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/expre_ip"
+            app:layout_constraintBottom_toBottomOf="@id/expre_ip"
+            app:layout_constraintStart_toStartOf="@id/separator"
+            android:src="@drawable/ip"
+            />
+
+        <TextView
+            android:id="@+id/expre_port"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/expre_ip"
+            app:layout_constraintEnd_toEndOf="@id/expre_ip"
+            app:layout_constraintStart_toStartOf="@id/expre_ip"
+            android:layout_marginTop="20dp"
+            android:textSize="20dp"
+            android:fontFamily="@font/pixei"
+            android:textColor="@color/green"
+            android:text="9090"
+            />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/ip_view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/ip_view"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="15dp"
+            android:src="@drawable/ports"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/copy"
+        android:id="@+id/edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/name"
-        app:layout_constraintBottom_toBottomOf="@id/name"
-        app:layout_constraintEnd_toEndOf="@id/back"
-        android:layout_marginEnd="20dp"
-        android:src="@drawable/copy"
-        />
-
-
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/type"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/person"
-        app:layout_constraintTop_toTopOf="@id/name"
-        app:layout_constraintBottom_toBottomOf="@id/name"
-        app:layout_constraintEnd_toStartOf="@id/name"
-        android:layout_marginEnd="20dp"
-        />
-
-    <TextView
-        android:id="@+id/ip_po"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="@id/back"
-        app:layout_constraintStart_toStartOf="@id/back"
-        app:layout_constraintTop_toBottomOf="@id/name"
-        android:layout_marginTop="20dp"
-        android:textSize="17dp"
-        android:fontFamily="monospace"
-        android:textColor="@color/white"
-        android:text="100.100.100.100"
-        android:gravity="center"
-        android:maxWidth="200dp"
-        android:maxLines="1"
+        android:src="@drawable/edit"
+        app:layout_constraintBottom_toTopOf="@id/delete"
+        app:layout_constraintStart_toEndOf="@id/back_saves"
+        app:layout_constraintTop_toTopOf="@id/back_saves"
+        android:layout_marginStart="40dp"
         />
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/ip_po"
-        app:layout_constraintBottom_toBottomOf="@id/ip_po"
-        app:layout_constraintEnd_toEndOf="@id/back"
-        app:layout_constraintStart_toEndOf="@id/ip_po"
         android:src="@drawable/delete"
-        />
-
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/edit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/ip_po"
-        app:layout_constraintBottom_toBottomOf="@id/ip_po"
-        app:layout_constraintStart_toStartOf="@id/back"
-        app:layout_constraintEnd_toStartOf="@id/ip_po"
-        android:src="@drawable/edit"
+        app:layout_constraintBottom_toBottomOf="@id/back_saves"
+        app:layout_constraintTop_toBottomOf="@id/edit"
+        app:layout_constraintStart_toEndOf="@id/back_saves"
+        android:layout_marginStart="40dp"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

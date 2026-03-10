@@ -1,10 +1,12 @@
 package com.test_tcp
 
 import android.annotation.SuppressLint
+import androidx.annotation.NonNull
 import androidx.core.graphics.toColorInt
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlin.collections.joinToString
 import kotlin.math.log2
+import kotlin.math.roundToInt
 import kotlin.ranges.rangeTo
 import kotlin.text.toList
 
@@ -13,7 +15,7 @@ val numeros_l = (0..9).joinToString("").toList()
 val minusculas_l = ('a'..'z').joinToString("").toList()
 
 @SuppressLint("ResourceAsColor")
-fun entropy(pass: String, porgress: LinearProgressIndicator){
+fun entropy(pass: String, porgress: LinearProgressIndicator): Int {
 
 
 
@@ -47,4 +49,6 @@ fun entropy(pass: String, porgress: LinearProgressIndicator){
     }else {
         porgress.setIndicatorColor("#e3e3e3".toColorInt())
     }
+
+    return final.toInt()
 }

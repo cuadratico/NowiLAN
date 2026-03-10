@@ -44,6 +44,20 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <TextView
+        android:id="@+id/time_usr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/usr"
+        app:layout_constraintStart_toStartOf="@id/usr"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:textSize="10dp"
+        android:fontFamily="@font/pixei"
+        android:textColor="@color/green"
+        android:text="05-12-1999"
+        />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/no_usr"
         android:layout_width="wrap_content"
@@ -78,5 +92,19 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+
+    <TextView
+        android:id="@+id/time_no_usr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/no_usr"
+        app:layout_constraintEnd_toEndOf="@id/no_usr"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:textSize="10dp"
+        android:textColor="@color/green"
+        android:fontFamily="@font/pixei"
+        android:text="05-12-1999"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

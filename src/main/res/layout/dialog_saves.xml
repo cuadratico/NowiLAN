@@ -7,12 +7,12 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="300dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/back_may"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/green_border_25"
         >
 
@@ -22,19 +22,68 @@
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginEnd="20dp"
-            android:layout_marginTop="20dp"
-            app:boxStrokeWidth="2dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="10dp"
             >
 
-        <EditText
-            android:id="@+id/input_name"
-            android:layout_width="200dp"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_name"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="17dp"
+                android:hint="Name //"
+                android:fontFamily="monospace"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/back_name"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/person"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/back_may"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@drawable/green_border_25"
+        >
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/back_ip"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/input_ip"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textColor="@color/white"
             android:textSize="17dp"
-            android:hint="name"
+            android:hint="IP //"
             android:fontFamily="monospace"
             android:maxLines="1"
             />
@@ -45,11 +94,13 @@
             android:id="@+id/type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@id/back_name"
-            app:layout_constraintBottom_toBottomOf="@id/back_name"
+            app:layout_constraintTop_toTopOf="@id/back_ip"
+            app:layout_constraintBottom_toBottomOf="@id/back_ip"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/back_name"
-            android:src="@drawable/person"
+            app:layout_constraintEnd_toStartOf="@id/back_ip"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:src="@drawable/ip"
             />
 
 
@@ -57,7 +108,7 @@
             android:id="@+id/back_ip_po"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/back_name"
+            app:layout_constraintTop_toBottomOf="@id/back_ip"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginBottom="20dp"
@@ -66,29 +117,42 @@
             app:boxStrokeWidth="2dp"
             >
 
-            <EditText
-                android:id="@+id/input_ip_po"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_port"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textColor="@color/white"
                 android:textSize="17dp"
-                android:hint="IP"
+                android:hint="Port //"
                 android:fontFamily="monospace"
                 android:maxLines="1"
                 />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/edit"
+            android:id="@+id/global"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="@id/back_ip_po"
             app:layout_constraintBottom_toBottomOf="@id/back_ip_po"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/back_ip_po"
-            android:src="@drawable/edit"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:layout_width="220dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/back_may"
+        app:layout_constraintStart_toStartOf="@id/back_may"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:text="In this section you can edit the values in your database //"
+        android:textColor="@color/green"
+        android:fontFamily="monospace"
+        android:textSize="13dp"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

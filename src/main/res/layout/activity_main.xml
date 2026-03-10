@@ -12,7 +12,6 @@
 
 
 
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recy"
         android:layout_width="match_parent"
@@ -25,69 +24,88 @@
         />
 
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/wifi_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/wifi_off"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/wifi_reca"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/green_border_25"
-        app:layout_constraintTop_toBottomOf="@id/wifi_icon"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="20dp"
-        android:textColor="@color/white"
-        android:fontFamily="monospace"
-        android:textAllCaps="false"
-        android:text="check the connection"
-        android:textSize="15dp"
-        />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/back_center"
         android:layout_width="350dp"
-        android:layout_height="300dp"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         >
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/create_pass"
+
+
+        <TextView
+            android:id="@+id/info_connect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/back_direction"
-            android:src="@drawable/create_pass"
+            app:layout_constraintBottom_toTopOf="@id/port_back"
+            android:layout_marginBottom="5dp"
+            android:text="CONNECTION"
+            android:textSize="21dp"
+            android:textColor="@color/green"
+            android:fontFamily="@font/pixei"
             />
 
 
 
-        <androidx.appcompat.widget.AppCompatButton
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/button"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/green_border_25"
+            android:layout_height="50dp"
+            android:background="@drawable/border_minus"
+            android:backgroundTint="@color/green"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginBottom="20dp"
-            android:textColor="@color/white"
+            android:layout_marginBottom="70dp"
+            >
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/arrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="5dp"
+                android:src="@drawable/pixel_arrow_right"
+                />
+
+            <TextView
+                android:id="@+id/info_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/arrow"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/black_c"
+                android:fontFamily="sans-serif-black"
+                android:text="INITIALIZE"
+                android:textSize="25dp"
+                android:textFontWeight="800"
+                />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/text_info"
+            android:layout_width="220dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/button"
+            app:layout_constraintStart_toStartOf="@id/button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="In this section you can create and connect to TCP servers //"
+            android:textColor="@color/green"
             android:fontFamily="monospace"
-            android:textAllCaps="false"
-            android:text="Create"
-            android:textSize="15dp"
+            android:textSize="13dp"
             />
 
         <com.google.android.material.imageview.ShapeableImageView
@@ -103,7 +121,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/port_back"
-            android:layout_width="200dp"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -113,14 +131,14 @@
 
             >
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/port"
-                android:layout_width="200dp"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textColor="@color/white"
                 android:textSize="17dp"
-                android:hint="Port"
+                android:hint="Port //"
                 android:fontFamily="monospace"
                 android:inputType="number"
                 android:maxLines="1"
@@ -128,76 +146,75 @@
                 />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/ports"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/back_directions"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@id/port_back"
-            app:layout_constraintBottom_toBottomOf="@id/port_back"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/port_back"
-            android:src="@drawable/ports"
-            />
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/save_ports"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@id/port_back"
-            app:layout_constraintBottom_toBottomOf="@id/port_back"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/port_back"
-            android:src="@drawable/save"
-            />
-
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/back_direction"
-            android:layout_width="200dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/port_back"
-            android:layout_marginBottom="20dp"
-            app:boxStrokeWidth="2dp"
-
+            android:layout_marginBottom="15dp"
             >
 
-            <EditText
-                android:id="@+id/direction"
-                android:layout_width="200dp"
+
+            <TextView
+                android:id="@+id/info_create"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textColor="@color/white"
-                android:textSize="17dp"
-                android:hint="Private IP"
-                android:fontFamily="monospace"
-                android:maxLines="1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:text="SERVER"
+                android:textSize="21dp"
+                android:textColor="@color/green"
+                android:fontFamily="@font/pixei"
                 />
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/info_create"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="5dp"
+                app:boxStrokeWidth="2dp">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/direction"
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="17dp"
+                    android:hint="Private IP //"
+                    android:fontFamily="monospace"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/ips"
+            android:id="@+id/save_values"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@id/back_direction"
-            app:layout_constraintBottom_toBottomOf="@id/back_direction"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/back_direction"
-            android:src="@drawable/ips"
+            app:layout_constraintBottom_toBottomOf="@id/button"
+            app:layout_constraintTop_toTopOf="@id/button"
+            app:layout_constraintEnd_toStartOf="@id/button"
+            android:layout_marginEnd="15dp"
+            android:src="@drawable/no_save"
             />
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/save_directions"
+            android:id="@+id/storage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@id/back_direction"
-            app:layout_constraintBottom_toBottomOf="@id/back_direction"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/back_direction"
-            android:src="@drawable/save"
+            app:layout_constraintEnd_toEndOf="@id/save_values"
+            app:layout_constraintStart_toStartOf="@id/save_values"
+            app:layout_constraintTop_toBottomOf="@id/save_values"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/storage"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -223,7 +240,7 @@
 
 
             <EditText
-                android:id="@+id/message"
+                android:id="@+id/input_message"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
@@ -234,7 +251,7 @@
                 android:fontFamily="monospace"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:hint="Message"
+                android:hint="Message //"
                 android:textSize="17dp"
                 android:background="@color/chat_back_background"
                 />
@@ -304,7 +321,6 @@
         android:id="@+id/noti"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/notification_off"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="15.5dp"
@@ -317,9 +333,10 @@
         android:id="@+id/info_nowi"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Built for privacy :)"
-        android:textSize="17dp"
-        android:fontFamily="monospace"
+        android:text="A Nowi product :)"
+        android:textSize="20dp"
+        android:fontFamily="@font/pixei"
+        android:textColor="@color/green"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"

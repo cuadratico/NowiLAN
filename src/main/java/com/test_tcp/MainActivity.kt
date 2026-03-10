@@ -2,7 +2,6 @@ package com.test_tcp
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Dialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,33 +11,34 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.shapes.Shape
 import android.net.wifi.WifiManager
-import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.AppCompatButton
+import androidx.appcompat.widget.SearchView
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.addTextChangedListener
@@ -51,12 +51,13 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.test_tcp.R
 import com.test_tcp.db_info.Companion.saves_list
 import com.test_tcp.recy.chat
 import com.test_tcp.recy.chat_adapter
-import com.test_tcp.recy.saves_adapter
+import com.test_tcp.recy.saves.saves_adapter
+import com.test_tcp.recy.saves.saves_class
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -76,21 +77,10 @@ import javax.crypto.spec.GCMParameterSpec
 
 class MainActivity : AppCompatActivity() {
 
-    companion object {
-        var update = false
-    }
-    private var channel: Socket? = null
-    private var adapter: chat_adapter? = null
-    private lateinit var dialog_very: Dialog
-    private lateinit var adapter_saves: saves_adapter
-    private lateinit var load_dialog: Dialog
-    private lateinit var dialog_pass: BottomSheetDialog
-
     private lateinit var noti: ShapeableImageView
 
+    private lateinit var mk: MasterKey
     private lateinit var pref: SharedPreferences
-
-    private val chat_list = mutableListOf<chat>()
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,570 +88,169 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        val mk = MasterKey.Builder(this)
+        delegate.localNightMode = AppCompatDelegate.MODE_NIGHT_YES
+
+        mk = MasterKey.Builder(this)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
         pref = EncryptedSharedPreferences.create(this, "ap", mk, EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM)
 
-        delegate.localNightMode = AppCompatDelegate.MODE_NIGHT_YES
+        // modificar todos los elemtnos cambiados
 
-        val recy = findViewById<RecyclerView>(R.id.recy)
+        val recy_global = findViewById<RecyclerView>(R.id.recy)
 
-
-        val wifi_icon = findViewById<ShapeableImageView>(R.id.wifi_icon)
-        val wifi_reca = findViewById<AppCompatButton>(R.id.wifi_reca)
-
+        // top info space
         val back_top = findViewById<ConstraintLayout>(R.id.back_top)
-        val port_exp = findViewById<TextView>(R.id.expre)
+        val close_channel = findViewById<ShapeableImageView>(R.id.close)
+        val port_view = findViewById<TextView>(R.id.expre)
         noti = findViewById(R.id.noti)
-        val close = findViewById<ShapeableImageView>(R.id.close)
-        close.visibility = View.INVISIBLE
 
+        // center space
         val back_center = findViewById<ConstraintLayout>(R.id.back_center)
 
-        val create_pass = findViewById<ShapeableImageView>(R.id.create_pass)
+        val back_directions = findViewById<ConstraintLayout>(R.id.back_directions)
+        val input_directions = findViewById<TextInputEditText>(R.id.direction)
 
-        val back_direction = findViewById<TextInputLayout>(R.id.back_direction)
+        val info_connect  = findViewById<TextView>(R.id.info_connect)
+        val input_port = findViewById<TextInputEditText>(R.id.port)
 
-        val input_direction = findViewById<EditText>(R.id.direction)
-        val save_direction = findViewById<ShapeableImageView>(R.id.save_directions)
-        val ips = findViewById<ShapeableImageView>(R.id.ips)
-        save_direction.visibility = View.INVISIBLE
+        val save_values = findViewById<ShapeableImageView>(R.id.save_values)
+        val storage = findViewById<ShapeableImageView>(R.id.storage)
 
-        val input_port = findViewById<EditText>(R.id.port)
-        val save_ports = findViewById<ShapeableImageView>(R.id.save_ports)
-        val ports = findViewById<ShapeableImageView>(R.id.ports)
-        save_ports.visibility = View.INVISIBLE
+        val init_b = findViewById<ConstraintLayout>(R.id.button)
 
-        val button = findViewById<AppCompatButton>(R.id.button)
         val modi = findViewById<ShapeableImageView>(R.id.modi)
 
+        // bottom space
         val back_bot = findViewById<ConstraintLayout>(R.id.back_bot)
 
-        val message = findViewById<TextView>(R.id.info_nowi)
+        val input_message = findViewById<EditText>(R.id.input_message)
+        val send_but = findViewById<ShapeableImageView>(R.id.send)
 
-        val send = findViewById<ShapeableImageView>(R.id.send)
-        val input_message = findViewById<EditText>(R.id.message)
-        send.visibility = View.INVISIBLE
+        // extra
+        val info_nowi = findViewById<TextView>(R.id.info_nowi)
 
 
-        wifi_icon.visibility = View.INVISIBLE
-        wifi_reca.visibility = View.INVISIBLE
+
+
+        // application features
+
+        // start part
 
         back_top.visibility = View.INVISIBLE
-
         back_bot.visibility = View.INVISIBLE
 
-
-        val wifi_manager = this.getSystemService(Context.WIFI_SERVICE) as WifiManager
-
-        if (wifi_manager.wifiState != 3){
-            back_center.visibility = View.INVISIBLE
-            wifi_icon.visibility = View.VISIBLE
-            wifi_reca.visibility = View.VISIBLE
-        }
-
-        wifi_reca.setOnClickListener {
-            if (wifi_manager.wifiState == 3){
-                back_center.visibility = View.VISIBLE
-                wifi_icon.visibility = View.INVISIBLE
-                wifi_reca.visibility = View.INVISIBLE
-            }else {
-                Toast.makeText(this, "You still don't have access to the Wi-Fi network", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-
-        fun permiss (): Boolean {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
-                return false
+        fun modi_change () {
+            if (pref.getBoolean("modi", false)) {
+                back_directions.visibility = View.INVISIBLE
+                info_connect.visibility = View.VISIBLE
             } else {
-                return true
+                info_connect.visibility = View.INVISIBLE
+                val animation = AnimationUtils.loadAnimation(this, R.anim.translate_input_directions)
+
+                animation.setAnimationListener(object: Animation.AnimationListener {
+                    override fun onAnimationEnd(p0: Animation?) {
+                        input_directions.isEnabled = true
+                    }
+
+                    override fun onAnimationRepeat(p0: Animation?) {}
+
+                    override fun onAnimationStart(p0: Animation?) {
+                        back_directions.visibility = View.VISIBLE
+                        input_directions.isEnabled = false
+                    }
+                })
+
+                back_directions.startAnimation(animation)
+
             }
         }
 
-        if (!permiss()) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100)
+        modi_change()
+
+        modi.setOnClickListener {
+            modi.startAnimation(AnimationUtils.loadAnimation(this, R.anim.rotate_360))
+            pref.edit().putBoolean("modi", !pref.getBoolean("modi", false)).commit()
+            modi_change()
+        }
+
+        // notification part
+
+        fun noti_state () {
+            if (pref.getBoolean("noti", false)) {
+                noti.setBackgroundResource(R.drawable.noti)
+            } else {
+                noti.setBackgroundResource(R.drawable.noti_silence)
+            }
+        }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
+            this.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100)
         } else {
-            noti.setImageResource(R.drawable.notification_on)
+            noti_state()
         }
 
         noti.setOnClickListener {
-            if (permiss()) {
-                pref.edit().putBoolean("noti", !pref.getBoolean("noti", false)).commit()
-                if (pref.getBoolean("noti", false)) {
-                    noti.setImageResource(R.drawable.notification_on)
+            pref.edit().putBoolean("noti", !pref.getBoolean("noti", false)).commit()
+            noti_state()
+        }
+
+        // save values part
+
+        var save = false
+
+        fun can_save () {
+            if (very_data(input_directions.text.toString(), 1) || very_data(input_port.text.toString())) {
+                save_values.setImageResource(R.drawable.save)
+                save = true
+            } else {
+                save_values.setImageResource(R.drawable.no_save)
+                save = false
+            }
+        }
+
+        input_directions.addTextChangedListener { can_save() }
+        input_port.addTextChangedListener {  can_save() }
+
+        save_values.setOnClickListener {
+            if (save) {
+                dialog_login(this, pref) {
+                    values_dialog(this@MainActivity, pref, R.drawable.save_local, input_directions.text.toString(), input_port.text.toString()) { values_en, iv ->
+                        val db = db_info(this)
+                        db.add(values_en, iv)
+                    }
+                }
+            } else {
+                Toast.makeText(this, "There are no coincidences to keep", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        storage.setOnClickListener {
+            dialog_login(this@MainActivity, pref) {
+                val db = db_info(this)
+
+                if (db.select()) {
+
+                    val bottom_dialog = BottomSheetDialog(this)
+                    val bottom_view = LayoutInflater.from(this).inflate(R.layout.saves_inter, null)
+
+                    val search_usr = bottom_view.findViewById<SearchView>(R.id.search_users)
+                    val recy_saves = bottom_view.findViewById<RecyclerView>(R.id.recy)
+
+                    // imprimir los valores en el recycler view y programar el search view
+
+                    bottom_dialog.setContentView(bottom_view)
+                    bottom_dialog.window?.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
+                    bottom_dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                    bottom_dialog.show()
+
                 } else {
-                    noti.setImageResource(R.drawable.notification_off)
-                }
-            } else {
-                Toast.makeText(this, "NowiLAN needs notification permissions", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        fun button_version () {
-            ports.visibility = View.VISIBLE
-            if (pref.getBoolean("sta", false)) {
-                button.text = "Connect"
-                back_direction.visibility = View.VISIBLE
-                ips.visibility = View.VISIBLE
-                if (very_data(input_direction.text.toString(), 1)) {
-                    save_direction.visibility = View.VISIBLE
-                }
-            } else {
-                back_direction.visibility = View.INVISIBLE
-                ips.visibility = View.INVISIBLE
-                save_direction.visibility = View.INVISIBLE
-                input_direction.setText("")
-                button.text = "Create"
-            }
-            if (very_data(input_port.text.toString())) {
-                save_ports.visibility = View.VISIBLE
-            }
-
-            if (!pref.getBoolean("start", false)) {
-                ips.visibility = View.INVISIBLE
-                ports.visibility = View.INVISIBLE
-            } else {
-                create_pass.visibility = View.INVISIBLE
-            }
-
-        }
-
-        button_version()
-
-
-        modi.setOnClickListener {
-            pref.edit().putBoolean("sta", !pref.getBoolean("sta", false)).commit()
-            button_version()
-        }
-
-        val update_all = lifecycleScope.launch(Dispatchers.IO, start = CoroutineStart.LAZY) {
-
-            while (true) {
-
-                if (update) {
-                    update = false
-                    withContext(Dispatchers.Main) {
-                        adapter_saves.update()
-                        if (saves_list.isEmpty()) {
-                            dialog_pass.dismiss()
-                            Toast.makeText(this@MainActivity, "The list is empty", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-
-                delay(50)
-            }
-        }
-
-        /*}
-
-             */
-
-        val scope = CoroutineScope(Dispatchers.IO).launch (start = CoroutineStart.LAZY){
-
-            try {
-                if (!pref.getBoolean("sta", false)) {
-                    val scoket = ServerSocket(input_port.text.toString().toInt())
-
-                    channel = scoket.accept()
-                } else {
-                    channel = Socket(input_direction.text.toString(), input_port.text.toString().toInt())
-                }
-                withContext(Dispatchers.Main) {
-                    load_dialog.dismiss()
-                    input_direction.setText("")
-                    input_port.setText("")
-                    port_exp.text = channel!!.inetAddress.toString().replace("/", "")
-                    send.visibility = View.VISIBLE
-                    close.visibility = View.VISIBLE
-                }
-            }catch (e: Exception) {
-                Log.e("Error", e.toString())
-                channel?.close()
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, "Connection interrupted", Toast.LENGTH_SHORT).show()
-                    recreate()
-                }
-            }
-
-
-
-            while (true) {
-                try {
-                    if (channel!!.isConnected && channel!!.inputStream!!.read() != 0) {
-                        val buffer = ByteArray(2048)
-
-                        channel!!.inputStream.read(buffer)
-
-                        val message = String(buffer)
-                        chat_list.add(chat(message, false))
-
-                        if (pref.getBoolean("noti", false) && !pref.getBoolean("in", true)) {
-                            val noti = NotificationCompat.Builder(applicationContext, "noti_lan").apply {
-                                    setSmallIcon(R.mipmap.chat_back_round)
-                                    setContentTitle(port_exp.text.toString())
-                                    setContentText(message)
-                                    setPriority(NotificationManager.IMPORTANCE_HIGH)
-                                }.build()
-
-                            NotificationManagerCompat.from(applicationContext).notify(1, noti)
-                        } else {
-                            withContext(Dispatchers.Main) {
-                                adapter?.update(chat_list)
-                                recy.scrollToPosition(chat_list.size)
-                            }
-                        }
-
-
-                    }
-
-                } catch (e: Exception) {
-                    Log.e("Error", e.toString())
-                    channel?.close()
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "Connection interrupted", Toast.LENGTH_SHORT).show()
-                        recreate()
-                    }
-                    break
-                }
-
-                delay(50)
-            }
-            cancel()
-        }
-
-        fun close () {
-            MaterialAlertDialogBuilder(this).apply {
-                setTitle("Are you sure you want to close the connection?")
-                setMessage("If you close the connection, all chat information will be deleted.")
-                setPositiveButton("Close") {_, _ ->
-                    scope.cancel()
-                    channel?.close()
-                    recreate()
-                }
-                setNegativeButton("Keep") {_, _ ->}
-            }.show()
-        }
-
-        fun load (text: String, sock: Boolean = false): Dialog {
-
-            val dialog = Dialog(this@MainActivity)
-            val view = LayoutInflater.from(this@MainActivity).inflate(R.layout.connection_delay, null)
-
-            val progress = view.findViewById<ProgressBar>(R.id.progress)
-            val info_text = view.findViewById<TextView>(R.id.text)
-            val button = view.findViewById<ShapeableImageView>(R.id.disco)
-
-            if (!sock)  {
-                button.visibility = View.INVISIBLE
-            }
-
-            button.setOnClickListener {
-                close()
-            }
-
-            progress.isActivated = true
-            info_text.text = text
-
-            dialog.setContentView(view)
-            dialog.setCancelable(false)
-            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            dialog.show()
-            return dialog
-        }
-
-        input_direction.addTextChangedListener { ip ->
-            if (pref.getBoolean("start", false) && ip.toString().isNotEmpty() && very_data(ip.toString(), 1)) {
-                save_direction.visibility = View.VISIBLE
-            } else {
-                save_direction.visibility = View.INVISIBLE
-            }
-        }
-
-        input_port.addTextChangedListener { ports ->
-            if (pref.getBoolean("start", false) && ports.toString().isNotEmpty() && very_data(ports.toString())) {
-                save_ports.visibility = View.VISIBLE
-            } else {
-                save_ports.visibility = View.INVISIBLE
-            }
-        }
-
-        val promt = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Authenticate yourself")
-            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
-            .build()
-
-        button.setOnClickListener {
-            if (input_port.text.isNotEmpty() && very_data(input_port.text.toString())) {
-
-                if ((pref.getBoolean("sta", false) && very_data(input_direction.text.toString(), 1)) || !pref.getBoolean("sta", false)) {
-
-                    BiometricPrompt(this, ContextCompat.getMainExecutor(this), object : BiometricPrompt.AuthenticationCallback() {
-                            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                                super.onAuthenticationSucceeded(result)
-                                message.visibility = View.INVISIBLE
-
-                                load_dialog = load("Wait for the connection to be established.", true)
-
-                                scope.start()
-
-                                back_center.visibility = View.INVISIBLE
-
-                                back_top.visibility = View.VISIBLE
-                                back_bot.visibility = View.VISIBLE
-
-                                adapter = chat_adapter(chat_list)
-
-                                recy.adapter = adapter
-                                recy.layoutManager = LinearLayoutManager(this@MainActivity)
-                            }
-                        }).authenticate(promt)
-
-                }else {
-                    Toast.makeText(this, "IP problems", Toast.LENGTH_SHORT).show()
-                }
-
-            } else {
-                Toast.makeText(this, "Port problems", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        send.setOnClickListener {
-            lifecycleScope.launch (Dispatchers.IO) {
-                channel!!.outputStream.write(" ${input_message.text.toString()}".toByteArray())
-                cancel()
-            }
-            chat_list.add(chat(input_message.text.toString()))
-            adapter?.update(chat_list)
-            recy.scrollToPosition(chat_list.size)
-            input_message.text.clear()
-        }
-
-        close.setOnClickListener {
-            close()
-        }
-
-        fun very_pass (): Pair<AppCompatButton, EditText> {
-
-            dialog_very = Dialog(this)
-            val view = LayoutInflater.from(this).inflate(R.layout.pass_auth, null)
-
-            val input_pass = view.findViewById<EditText>(R.id.input_pass)
-            val progress = view.findViewById<LinearProgressIndicator>(R.id.progress)
-            val very = view.findViewById<AppCompatButton>(R.id.create_pass)
-            very.text = "Verify"
-
-            input_pass.addTextChangedListener { data ->
-                entropy(data.toString(), progress)
-            }
-
-            dialog_very.setContentView(view)
-            dialog_very.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            dialog_very.show()
-
-            return Pair(very, input_pass)
-        }
-
-
-
-        create_pass.setOnClickListener {
-
-            val (create, input_pass) = very_pass()
-
-            create.setOnClickListener {
-                create.isEnabled = false
-                input_pass.isEnabled = false
-                if (input_pass.text.isNotEmpty()) {
-                    load_dialog = load("Creating the cryptographic key")
-                    try {
-                        lifecycleScope.launch (Dispatchers.IO) {
-                            val ks = KeyGenParameterSpec.Builder(input_pass.text.toString(), KeyProperties.PURPOSE_DECRYPT or KeyProperties.PURPOSE_ENCRYPT).apply {
-                                setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                                setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                            }.build()
-
-                            val kg = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").apply {
-                                init(ks)
-                            }
-
-                            kg.generateKey()
-                            pref.edit().putString("salt", Base64.getEncoder().withoutPadding().encodeToString(SecureRandom().generateSeed(16))).commit()
-                            pref.edit().putString("hash", Base64.getEncoder().withoutPadding().encodeToString(MessageDigest.getInstance("SHA256").digest(input_pass.text.toString().toByteArray() + Base64.getDecoder().decode(pref.getString("salt", ""))))).commit()
-
-                            Log.e("hash", Base64.getDecoder().decode(pref.getString("hash", "")).toString())
-
-                            pref.edit().putBoolean("start", true).commit()
-
-                            withContext(Dispatchers.Main) {
-                                button_version()
-                                load_dialog.dismiss()
-                                dialog_very.dismiss()
-                            }
-                            cancel()
-                        }
-
-                    } catch (e: Exception) {
-                        Log.e("Error", e.toString())
-                        Toast.makeText(this, "The operation could not be completed", Toast.LENGTH_SHORT).show()
-                        pref.edit().putString("salt", "").commit()
-                        pref.edit().putString("hash", "").commit()
-
-                        val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
-
-                        if (ks.getKey(input_pass.text.toString(), null) != null) {
-                            ks.deleteEntry(input_pass.text.toString())
-                        }
-                    }
-
+                    Toast.makeText(this, "There is no information in the database", Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
-
-
-        fun dialog_de () {
-            dialog_pass = BottomSheetDialog(this@MainActivity)
-            val view = LayoutInflater.from(this@MainActivity).inflate(R.layout.saves_inter, null)
-
-            val recy = view.findViewById<RecyclerView>(R.id.recy)
-
-            adapter_saves = saves_adapter(saves_list)
-            recy.adapter = adapter_saves
-            recy.layoutManager = LinearLayoutManager(this@MainActivity)
-
-            dialog_pass.setContentView(view)
-            dialog_pass.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            dialog_pass.show()
-
-            dialog_pass.setOnDismissListener(object: DialogInterface.OnDismissListener {
-                override fun onDismiss(dialog: DialogInterface?) {
-                    pref.edit().putString("k_u", "").commit()
-                    saves_list.clear()
-                }
-
-            })
-        }
-
-
-        fun very_db (type: Int) {
-
-            val scope = CoroutineScope(Dispatchers.IO).launch (start = CoroutineStart.LAZY){
-                val db = db_info(applicationContext)
-                if (db.select(type.toString()) || saves_list.isNotEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        load_dialog = load("decrypting the information")
-                    }
-                    try {
-                        val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
-
-                        for (position in 0..saves_list.size - 1) {
-                            val (id, name, value, iv, type) = saves_list[position]
-
-                            val c = Cipher.getInstance("AES/GCM/NoPadding")
-                            c.init(Cipher.DECRYPT_MODE, ks.getKey(pref.getString("k_u", ""), null), GCMParameterSpec(128, Base64.getDecoder().decode(iv)))
-
-                            saves_list[position].value = String(c.doFinal(Base64.getDecoder().decode(value.toByteArray())))
-
-                        }
-
-                        withContext(Dispatchers.Main) {
-                            Log.e("pass", saves_list.toString())
-                            dialog_very.dismiss()
-                            dialog_de()
-                        }
-
-                    } catch (e: Exception) {
-                        Log.e("Error", e.toString())
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(this@MainActivity, "The information could not be decrypted", Toast.LENGTH_SHORT).show()
-                            pref.edit().putString("k_u", "").commit()
-                        }
-                    } finally {
-                        load_dialog.dismiss()
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "The database is empty", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                cancel()
-            }
-
-            scope.start()
-
-        }
-
-
-        ips.setOnClickListener {
-            BiometricPrompt(this, ContextCompat.getMainExecutor(this), object: BiometricPrompt.AuthenticationCallback() {
-
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    val (very, input) = very_pass()
-
-                    very.setOnClickListener {
-                        if (very(this@MainActivity, input.text.toString(), pref)) {
-                            very_db(1)
-                            update_all.start()
-                        }
-                    }
-                }
-            }).authenticate(promt)
-        }
-
-        ports.setOnClickListener {
-            BiometricPrompt(this, ContextCompat.getMainExecutor(this), object: BiometricPrompt.AuthenticationCallback() {
-
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    val (very, input) = very_pass()
-                    very.setOnClickListener {
-                        if (very(this@MainActivity, input.text.toString(), pref)) {
-                            very_db(0)
-                            update_all.start()
-                        }
-                    }
-                }
-            }).authenticate(promt)
-        }
-
-
-
-        fun save_very (value: String, input: EditText = input_port, type: Int = 0) {
-            dialog_very.dismiss()
-            load_dialog = load("Saving your $value")
-            save_values(this, pref, "Default name", type, input.text.toString(), load_dialog)
-        }
-
-        save_ports.setOnClickListener {
-            val (very, input) = very_pass()
-
-            very.setOnClickListener {
-                if (very(this, input.text.toString(), pref)) {
-                    save_very("port")
-                }
-            }
-        }
-
-        save_direction.setOnClickListener {
-            val (very, input) = very_pass()
-
-            very.setOnClickListener {
-                if (very(this, input.text.toString(), pref)) {
-                    save_very("IP", input_direction, 1)
-                }
-            }
-        }
-
-
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_SECURE,
-            WindowManager.LayoutParams.FLAG_SECURE
-        )
 
 
 
@@ -672,32 +261,30 @@ class MainActivity : AppCompatActivity() {
             insets
         }
     }
-
-    override fun onStart() {
-        super.onStart()
-        pref.edit().putBoolean("in", true).commit()
-        adapter?.update(chat_list)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        pref.edit().putBoolean("in", false).commit()
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String?>, grantResults: IntArray, deviceId: Int) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
-        if (requestCode == 100) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                noti.setImageResource(R.drawable.notification_on)
-                pref.edit().putBoolean("noti", true).commit()
 
-                val register = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                register.createNotificationChannel(NotificationChannel("noti_lan", "noti_chan",
-                    NotificationManager.IMPORTANCE_HIGH))
+        if (requestCode == 100) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                pref.edit().putBoolean("noti", true).commit()
+                noti.setBackgroundResource(R.drawable.noti)
+
+                val noti_manager = this.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                noti_manager.createNotificationChannel(NotificationChannel("Nowi_l_id", "Nowi_l", NotificationManager.IMPORTANCE_MIN))
+
+                Toast.makeText(this, "Notifications activated", Toast.LENGTH_SHORT).show()
+
+                MaterialAlertDialogBuilder(this).apply {
+                    setTitle("How can I disable notifications?")
+                    setMessage("To turn notifications on or off, simply tap the bell icon in the top right corner (Even if you disable notifications, the notification channel will not be deleted for practicality and optimization)")
+                    setPositiveButton("Ok") {_, _ -> }
+                }.show()
 
             } else {
-                Toast.makeText(this, "You will need to request the permits later", Toast.LENGTH_SHORT).show()
+                noti.setBackgroundResource(R.drawable.noti_warning)
+                Toast.makeText(this, "The notification permission has not been accepted", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 }
